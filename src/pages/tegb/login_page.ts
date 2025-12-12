@@ -1,4 +1,4 @@
-import { Locator, Page } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 import { RegisterAccountPage } from "./register_account_page.ts";
 import { DashboardPage } from "./dashboard_page.ts";
 
@@ -9,6 +9,7 @@ export class LoginPage {
   readonly passwordImput: Locator;
   readonly loginButton: Locator;
   readonly registerButton: Locator;
+  readonly successMessage: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -18,6 +19,7 @@ export class LoginPage {
     this.registerButton = page.locator(
       "button[data-testid$='register-button']"
     );
+    this.successMessage = page.locator("div[data-testid=success-message]");
   }
 
   async open() {
@@ -43,5 +45,10 @@ export class LoginPage {
   async clickRegister() {
     await this.registerButton.click();
     return new RegisterAccountPage(this.page);
+  }
+
+  async waitForSuccessMessage() {
+    await expect(this.successMessage).toBeVisible();
+    return this;
   }
 }
