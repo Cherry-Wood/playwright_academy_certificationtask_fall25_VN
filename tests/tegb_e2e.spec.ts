@@ -2,7 +2,6 @@ import { expect, test } from "@playwright/test";
 import { LoginPage } from "../src/tegb/pages/login_page.ts";
 import { fakerCS_CZ as faker } from "@faker-js/faker";
 import { UserApi } from "../src/tegb/api/user_api.ts";
-import { request } from "http";
 
 test("E2E", async ({ page, request }) => {
   const loginPage = new LoginPage(page);
@@ -21,6 +20,15 @@ test("E2E", async ({ page, request }) => {
     multipleOf: 0.01,
   });
   const type = faker.finance.transactionType();
+  const profileName = faker.person.firstName();
+  const profileSurname = faker.person.lastName();
+  const profileEmail = faker.internet.email({
+    firstName: profileName,
+    lastName: profileSurname,
+    provider: "fake.testmail",
+  });
+  const profilePhone = faker.phone.number({ style: "international" });
+  const profileAge = faker.number.int({ min: 18, max: 90 });
 
   await loginPage
     .open()
@@ -41,11 +49,6 @@ test("E2E", async ({ page, request }) => {
   await loginPage
     .fillUsername(username)
     .then((login) => login.fillPassword(password))
-    .then((login) => login.clickLogin());
-
-  //TODO: think about what to wait for instead of this temporaly direct locators
-  await expect(
-    page.locator("div [data-testid='profile-details-title']")
-  ).toBeVisible();
-  await expect(page.locator("div[data-testid='name']")).toBeVisible();
+    .then((login) => login.clickLogin())
+    .then((dashboard) => dashboard.clickEditProfile());
 });
