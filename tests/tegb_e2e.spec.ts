@@ -1,9 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { LoginPage } from "../src/pages/tegb/login_page.ts";
+import { LoginPage } from "../src/tegb/pages/login_page.ts";
 import { fakerCS_CZ as faker } from "@faker-js/faker";
+import { UserApi } from "../src/tegb/api/user_api.ts";
+import { request } from "http";
 
-test("E2E", async ({ page }) => {
+test("E2E", async ({ page, request }) => {
   const loginPage = new LoginPage(page);
+  const api = new UserApi(request);
 
   const username =
     faker.internet.username() + "_" + faker.number.int({ max: 1_000 });
@@ -12,6 +15,12 @@ test("E2E", async ({ page }) => {
     firstName: username,
     provider: "fake.testmail",
   });
+  const startBalance = faker.number.float({
+    min: -100_000_000,
+    max: 100_000_000,
+    multipleOf: 0.01,
+  });
+  const type = faker.finance.transactionType();
 
   await loginPage
     .open()
@@ -20,10 +29,18 @@ test("E2E", async ({ page }) => {
     .then((register) => register.fillPassword(password))
     .then((register) => register.fillEmail(email))
     .then((register) => register.clickRegister())
-    .then((login) => login.waitForSuccessMessage())
-    .then((login) => login.fillUsername(username))
+    .then((login) => login.waitForSuccessMessage());
+
+  const token = await api.loginUserReturnToken(username, password);
+  const accountId = await api.createNeWAccountWithTokenReturnAccountId(
+    token,
+    startBalance,
+    type
+  );
+
+  await loginPage
+    .fillUsername(username)
     .then((login) => login.fillPassword(password))
-    //TODO: API request for mail creation
     .then((login) => login.clickLogin());
 
   //TODO: think about what to wait for instead of this temporaly direct locators
