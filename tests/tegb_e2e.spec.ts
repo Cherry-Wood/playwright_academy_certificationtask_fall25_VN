@@ -1,6 +1,7 @@
 import { test } from "@playwright/test";
-import { LoginPage } from "../src/tegb/pages/login_page.ts";
 import { fakerCS_CZ as faker } from "@faker-js/faker";
+
+import { LoginPage } from "../src/tegb/pages/login_page.ts";
 import { UserApi } from "../src/tegb/api/user_api.ts";
 import { DashboardPage } from "../src/tegb/pages/dashboard_page.ts";
 import { Topbar } from "../src/tegb/components/topbar.ts";
@@ -22,10 +23,11 @@ test("E2E: user registration, account, profile edit", async ({
     provider: "fake.testmail",
   });
   const startBalance = faker.number.float({
-    min: -100_000_000,
-    max: 100_000_000,
+    min: -99_999_999,
+    max: 99_999_999,
     multipleOf: 0.01,
   });
+
   const type = faker.finance.transactionType();
   const profileName = faker.person.firstName();
   const profileSurname = faker.person.lastName();

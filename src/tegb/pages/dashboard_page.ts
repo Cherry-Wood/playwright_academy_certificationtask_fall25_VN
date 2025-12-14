@@ -22,6 +22,8 @@ export class DashboardPage {
   readonly accountNumberDisplay: Locator;
   readonly accountBalanceDisplay: Locator;
   readonly accountTypeDisplay: Locator;
+  readonly accountsTable: Locator;
+  readonly accountsLoader: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -52,6 +54,8 @@ export class DashboardPage {
       "td[data-testid='account-balance']"
     );
     this.accountTypeDisplay = page.locator("td[data-testid='account-type']");
+    this.accountsTable = page.locator("table[class='accounts-table']");
+    this.accountsLoader = page.locator("div[data-testid='accounts-loading']");
   }
 
   async clickEditProfile() {
@@ -145,7 +149,7 @@ export class DashboardPage {
   async accountBalanceDisplayHaveNumber(number: number) {
     await expect
       .soft(this.accountBalanceDisplay, "Account balance display have number")
-      .toHaveText(number.toString() + " Kč");
+      .toHaveText(number.toFixed(2) + " Kč");
     return this;
   }
 
@@ -153,6 +157,12 @@ export class DashboardPage {
     await expect
       .soft(this.accountTypeDisplay, "Account type display have text")
       .toHaveText(text);
+    return this;
+  }
+
+  async accountsTableIsLoaded() {
+    await expect(this.accountsLoader).not.toBeAttached();
+    await expect(this.accountsTable, "Accounts table is visible").toBeVisible();
     return this;
   }
 }
