@@ -1,10 +1,17 @@
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
 import { LoginPage } from "../src/tegb/pages/login_page.ts";
 import { fakerCS_CZ as faker } from "@faker-js/faker";
 import { UserApi } from "../src/tegb/api/user_api.ts";
+import { DashboardPage } from "../src/tegb/pages/dashboard_page.ts";
+import { Topbar } from "../src/tegb/components/topbar.ts";
 
-test("E2E", async ({ page, request }) => {
+test("E2E: user registration, account, profile edit", async ({
+  page,
+  request,
+}) => {
   const loginPage = new LoginPage(page);
+  const dashboardPage = new DashboardPage(page);
+  const topbar = new Topbar(page);
   const api = new UserApi(request);
 
   const username =
@@ -28,27 +35,59 @@ test("E2E", async ({ page, request }) => {
     provider: "fake.testmail",
   });
   const profilePhone = faker.phone.number({ style: "international" });
-  const profileAge = faker.number.int({ min: 18, max: 90 });
+  const profileAge = faker.number.int({ min: 0, max: 122 });
+  let accountNumber: number;
 
-  await loginPage
-    .open()
-    .then((login) => login.clickRegister())
-    .then((register) => register.fillUsername(username))
-    .then((register) => register.fillPassword(password))
-    .then((register) => register.fillEmail(email))
-    .then((register) => register.clickRegister())
-    .then((login) => login.waitForSuccessMessage());
-
-  const token = await api.loginUserReturnToken(username, password);
-  const accountId = await api.createNeWAccountWithTokenReturnAccountId(
-    token,
-    startBalance,
-    type
-  );
-
-  await loginPage
-    .fillUsername(username)
-    .then((login) => login.fillPassword(password))
-    .then((login) => login.clickLogin())
-    .then((dashboard) => dashboard.clickEditProfile());
+  await test.step("User registration", async () => {
+    await loginPage
+      .open()
+      .then((login) => login.clickRegister())
+      .then((register) => register.fillUsername(username))
+      .then((register) => register.fillPassword(password))
+      .then((register) => register.fillEmail(email))
+      .then((register) => register.clickRegister())
+      .then((login) => login.waitForSuccessMessage());
+  });
+  await test.step("API login, API account creation", async () => {
+    const token = await api.loginUserReturnToken(username, password);
+    accountNumber = await api.createNeWAccountWithTokenReturnAccountNumber(
+      token,
+      startBalance,
+      type
+    );
+  });
+  await test.step("User login, profile edit", async () => {
+    await loginPage
+      .fillUsername(username)
+      .then((login) => login.fillPassword(password))
+      .then((login) => login.clickLogin())
+      .then((dashboard) => dashboard.clickEditProfile())
+      .then((dashboard) => dashboard.fillFirstName(profileName))
+      .then((dashboard) => dashboard.fillSurname(profileSurname))
+      .then((dashboard) => dashboard.fillEmail(profileEmail))
+      .then((dashboard) => dashboard.fillPhone(profilePhone))
+      .then((dashboard) => dashboard.fillAge(profileAge))
+      .then((dashboard) => dashboard.clickSaveChanges())
+      .then((dashboard) =>
+        dashboard.updateMessageHaveText("Profile updated successfully!")
+      );
+  });
+  await test.step("Dashboard checks: profile after edit, account", async () => {
+    await dashboardPage
+      .nameDisplayHaveText(profileName)
+      .then((dashboard) => dashboard.surnameDisplayHaveText(profileSurname))
+      .then((dashboard) => dashboard.emailDisplayHaveText(profileEmail))
+      .then((dashboard) => dashboard.phoneDisplayHaveText(profilePhone))
+      .then((dashboard) => dashboard.ageDisplayHaveNumber(profileAge))
+      .then((dashboard) =>
+        dashboard.accountNumberDisplayHaveNumber(accountNumber)
+      )
+      .then((dashboard) =>
+        dashboard.accountBalanceDisplayHaveNumber(startBalance)
+      )
+      .then((dashboard) => dashboard.accountTypeDisplayHaveText(type));
+  });
+  await test.step("Logout", async () => {
+    await topbar.clickLogout();
+  });
 });

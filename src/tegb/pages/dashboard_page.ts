@@ -11,6 +11,17 @@ export class DashboardPage {
   readonly phoneInput: Locator;
   readonly ageInput: Locator;
   readonly saveChangesProfileButton: Locator;
+  readonly updateMessage: Locator;
+
+  readonly nameDisplay: Locator;
+  readonly surnameDisplay: Locator;
+  readonly emailDisplay: Locator;
+  readonly phoneDisplay: Locator;
+  readonly ageDisplay: Locator;
+
+  readonly accountNumberDisplay: Locator;
+  readonly accountBalanceDisplay: Locator;
+  readonly accountTypeDisplay: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -28,6 +39,19 @@ export class DashboardPage {
     this.saveChangesProfileButton = page.locator(
       "button[data-testid='save-changes-button']"
     );
+    this.updateMessage = page.locator("div[class='update-message']");
+    this.nameDisplay = page.locator("div[data-testid='name']");
+    this.surnameDisplay = page.locator("div[data-testid='surname']");
+    this.emailDisplay = page.locator("div[data-testid='email']");
+    this.phoneDisplay = page.locator("div[data-testid='phone']");
+    this.ageDisplay = page.locator("div[data-testid='age']");
+    this.accountNumberDisplay = page.locator(
+      "td[data-testid='account-number']"
+    );
+    this.accountBalanceDisplay = page.locator(
+      "td[data-testid='account-balance']"
+    );
+    this.accountTypeDisplay = page.locator("td[data-testid='account-type']");
   }
 
   async clickEditProfile() {
@@ -66,6 +90,69 @@ export class DashboardPage {
 
   async clickSaveChanges() {
     await this.saveChangesProfileButton.click();
+    return this;
+  }
+
+  async updateMessageHaveText(text: string) {
+    await expect
+      .soft(this.updateMessage, "Update message have text")
+      .toHaveText(text);
+    return this;
+  }
+
+  async nameDisplayHaveText(text: string) {
+    await expect
+      .soft(this.nameDisplay, "Name display have text")
+      .toHaveText("Jméno: " + text);
+    return this;
+  }
+
+  async surnameDisplayHaveText(text: string) {
+    await expect
+      .soft(this.surnameDisplay, "Surname display have text")
+      .toHaveText("Příjmení: " + text);
+    return this;
+  }
+
+  async emailDisplayHaveText(text: string) {
+    await expect
+      .soft(this.emailDisplay, "Email display have text")
+      .toHaveText("Email: " + text);
+    return this;
+  }
+
+  async phoneDisplayHaveText(text: string) {
+    await expect
+      .soft(this.phoneDisplay, "Phone display have text")
+      .toHaveText("Telefon: " + text);
+    return this;
+  }
+
+  async ageDisplayHaveNumber(number: number) {
+    await expect
+      .soft(this.ageDisplay, "Age display have number")
+      .toHaveText("Věk: " + number.toString());
+    return this;
+  }
+
+  async accountNumberDisplayHaveNumber(number: number) {
+    await expect
+      .soft(this.accountNumberDisplay, "Account number display have number")
+      .toHaveText(number.toString());
+    return this;
+  }
+
+  async accountBalanceDisplayHaveNumber(number: number) {
+    await expect
+      .soft(this.accountBalanceDisplay, "Account balance display have number")
+      .toHaveText(number.toString() + " Kč");
+    return this;
+  }
+
+  async accountTypeDisplayHaveText(text: string) {
+    await expect
+      .soft(this.accountTypeDisplay, "Account type display have text")
+      .toHaveText(text);
     return this;
   }
 }

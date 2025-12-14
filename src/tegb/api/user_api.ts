@@ -37,7 +37,7 @@ export class UserApi {
     }
   }
 
-  async createNeWAccountWithTokenReturnAccountId(
+  async createNeWAccountWithTokenReturnAccountNumber(
     token: string,
     startBalance: number,
     type: string
@@ -50,7 +50,7 @@ export class UserApi {
       }
     );
     const resBody = await response.json();
-    const accountId = resBody.accountId;
-    return accountId;
+    const accountNumber = resBody.accountNumber;
+    return accountNumber;
   }
 }
