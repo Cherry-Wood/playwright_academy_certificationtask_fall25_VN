@@ -71,6 +71,7 @@ test.describe("Atomic Tests Dashboard", () => {
         .toHaveText("Upravit profil");
     });
   });
+
   test("Accounts summary shows elements", async () => {
     await test.step("Accounts summary title", async () => {
       await expect
@@ -148,6 +149,7 @@ test.describe("Atomic Tests Dashboard", () => {
         .toHaveText("Přidat účet");
     });
   });
+
   test("Inner profile edit button texts", async () => {
     await test.step("Cancel edits button", async () => {
       await dashboardPage.clickEditProfile();
@@ -176,10 +178,12 @@ test.describe("Atomic Tests Dashboard", () => {
       await dashboardPage.clickEditProfile();
     });
   });
+
   test.fixme("WIP: account button functionality", async () => {
     await dashboardPage.clickAddAccount();
     // not implemented yet
   });
+
   test("Sidebar items", async ({ page }) => {
     const sidebar = new Sidebar(page);
 
@@ -197,6 +201,7 @@ test.describe("Atomic Tests Dashboard", () => {
       .soft(sidebar.supportItem, "4th item has text")
       .toHaveText("Podpora");
   });
+
   test("Topbar items", async ({ page }) => {
     const topbar = new Topbar(page);
 

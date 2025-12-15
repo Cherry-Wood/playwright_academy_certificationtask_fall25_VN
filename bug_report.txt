@@ -1,0 +1,7 @@
+
+- API: /accounts/create vrací 500 při startBalance nad +-99_999_999.99 (pravděpodobně omezení v DB)
+- registration form: při registraci uživatele přes UI chybí alert že uživatel již existuje, form pouze vyhodí chybu v konzoli browseru (založení uživatele přes API upozorňující message má)
+- dashboard: validací age "Věk musí být číslo" v editaci profilu projde záporné číslo
+- dashboard: tlačítko zrušit změny v editaci profilu sice změny neuloží, ale vypsané hodnoty jsou poté vidět na dashboardu = vidíme hodnoty které nejsou uloženy, do přenačtení (name Honza, Editace, napíšu Petr do name, zrušit změny, vidím Petr místo Honza (chyba), F5, vidím Honza (ok))
+- dashboard: alert message "Unexpected error occured. Please try again later." na místo tabulky s účty - při založení více účteů přes api na stejného uživatele 
+- dashboard: lokátoty "data-testid="chage-surname-input" - typo "chage", také "data-testid:=account-summary" u profilu když je hned pod tím sekce account není šťastně pojmenovaná

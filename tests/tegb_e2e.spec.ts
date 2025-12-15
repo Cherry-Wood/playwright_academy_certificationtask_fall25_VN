@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { fakerCS_CZ as faker } from "@faker-js/faker";
 
 import { LoginPage } from "../src/tegb/pages/login_page.ts";
@@ -27,7 +27,6 @@ test("E2E: user registration, account, profile edit", async ({
     max: 99_999_999,
     multipleOf: 0.01,
   });
-
   const type = faker.finance.transactionType();
   const profileName = faker.person.firstName();
   const profileSurname = faker.person.lastName();
@@ -38,9 +37,11 @@ test("E2E: user registration, account, profile edit", async ({
   });
   const profilePhone = faker.phone.number({ style: "international" });
   const profileAge = faker.number.int({ min: 0, max: 122 });
+  const profileAgeString = faker.number.romanNumeral();
+
   let accountNumber: number;
 
-  await test.step("User registration", async () => {
+  await test.step("User registration in UI", async () => {
     await loginPage
       .open()
       .then((login) => login.clickRegister())
@@ -50,7 +51,8 @@ test("E2E: user registration, account, profile edit", async ({
       .then((register) => register.clickRegister())
       .then((login) => login.waitForSuccessMessage());
   });
-  await test.step("API login, API account creation", async () => {
+
+  await test.step("API login and bank account creation", async () => {
     const token = await api.loginUserReturnToken(username, password);
     accountNumber = await api.createNeWAccountWithTokenReturnAccountNumber(
       token,
@@ -58,13 +60,31 @@ test("E2E: user registration, account, profile edit", async ({
       type
     );
   });
-  await test.step("User login, profile edit", async () => {
+
+  await test.step("User login, open profile edit", async () => {
     await loginPage
       .fillUsername(username)
       .then((login) => login.fillPassword(password))
       .then((login) => login.clickLogin())
-      .then((dashboard) => dashboard.clickEditProfile())
-      .then((dashboard) => dashboard.fillFirstName(profileName))
+      .then((dashboard) => dashboard.clickEditProfile());
+  });
+
+  await test.step("Validation age must be number (alert)", async () => {
+    let dialogMessage = "";
+    await dashboardPage.ageInput.fill(profileAgeString);
+    page.once("dialog", async (dialog) => {
+      dialogMessage = dialog.message();
+      await dialog.accept();
+    });
+    await dashboardPage.clickSaveChanges();
+    expect(dialogMessage, "Validation alert have text").toBe(
+      "Věk musí být číslo."
+    );
+  });
+
+  await test.step("Fill profile edit form and save valid data", async () => {
+    await dashboardPage
+      .fillFirstName(profileName)
       .then((dashboard) => dashboard.fillSurname(profileSurname))
       .then((dashboard) => dashboard.fillEmail(profileEmail))
       .then((dashboard) => dashboard.fillPhone(profilePhone))
@@ -74,7 +94,8 @@ test("E2E: user registration, account, profile edit", async ({
         dashboard.updateMessageHaveText("Profile updated successfully!")
       );
   });
-  await test.step("Dashboard checks: profile after edit, account", async () => {
+
+  await test.step("Dashboard verify: profile, account", async () => {
     await dashboardPage
       .nameDisplayHaveText(profileName)
       .then((dashboard) => dashboard.surnameDisplayHaveText(profileSurname))
@@ -89,7 +110,9 @@ test("E2E: user registration, account, profile edit", async ({
       )
       .then((dashboard) => dashboard.accountTypeDisplayHaveText(type));
   });
+
   await test.step("Logout", async () => {
     await topbar.clickLogout();
   });
+  
 });
