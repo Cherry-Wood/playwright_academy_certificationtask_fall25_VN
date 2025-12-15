@@ -149,3 +149,4 @@ playwright.yml
 
 .env
 *.env
+bug_report.txt
