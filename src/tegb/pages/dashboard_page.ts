@@ -3,7 +3,7 @@ import { expect, Locator, Page } from "@playwright/test";
 export class DashboardPage {
   readonly page: Page;
   readonly editProfileButton: Locator;
-  readonly profileLoading: Locator;
+  readonly profileLoader: Locator;
 
   readonly firstNameInput: Locator;
   readonly surnameInput: Locator;
@@ -13,24 +13,32 @@ export class DashboardPage {
   readonly saveChangesProfileButton: Locator;
   readonly updateMessage: Locator;
 
+  readonly profileSummaryDiv: Locator;
+  readonly profileSummaryTitle: Locator;
   readonly nameDisplay: Locator;
   readonly surnameDisplay: Locator;
   readonly emailDisplay: Locator;
   readonly phoneDisplay: Locator;
   readonly ageDisplay: Locator;
 
+  readonly accountSummaryTitle: Locator;
   readonly accountNumberDisplay: Locator;
   readonly accountBalanceDisplay: Locator;
   readonly accountTypeDisplay: Locator;
   readonly accountsTable: Locator;
   readonly accountsLoader: Locator;
+  readonly accountsNumberHeader: Locator;
+  readonly accountsBalanceHeader: Locator;
+  readonly accountsTypeHeader: Locator;
+  readonly addAccountButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.profileLoading = page.locator("div[data-testid='profile-loading']");
     this.editProfileButton = page.locator(
       "button[data-testid='toggle-edit-profile-button']"
     );
+    this.profileLoader = page.locator("div[data-testid='profile-loading']");
+
     this.firstNameInput = page.locator("input[data-testid='chage-name-input']");
     this.surnameInput = page.locator(
       "input[data-testid='chage-surname-input']"
@@ -42,11 +50,20 @@ export class DashboardPage {
       "button[data-testid='save-changes-button']"
     );
     this.updateMessage = page.locator("div[class='update-message']");
+
+    this.profileSummaryDiv = page.locator("div[data-testid='account-summary']");
+    this.profileSummaryTitle = page.locator(
+      "div [data-testid='profile-details-title']"
+    );
     this.nameDisplay = page.locator("div[data-testid='name']");
     this.surnameDisplay = page.locator("div[data-testid='surname']");
     this.emailDisplay = page.locator("div[data-testid='email']");
     this.phoneDisplay = page.locator("div[data-testid='phone']");
     this.ageDisplay = page.locator("div[data-testid='age']");
+
+    this.accountSummaryTitle = page.locator(
+      "div [data-testid='accounts-title']"
+    );
     this.accountNumberDisplay = page.locator(
       "td[data-testid='account-number']"
     );
@@ -56,13 +73,43 @@ export class DashboardPage {
     this.accountTypeDisplay = page.locator("td[data-testid='account-type']");
     this.accountsTable = page.locator("table[class='accounts-table']");
     this.accountsLoader = page.locator("div[data-testid='accounts-loading']");
+    this.accountsNumberHeader = page.locator(
+      "th[data-testid='account-number-heading']"
+    );
+    this.accountsBalanceHeader = page.locator(
+      "th[data-testid='account-balance-heading']"
+    );
+    this.accountsTypeHeader = page.locator(
+      "th[data-testid='account-type-heading']"
+    );
+    this.addAccountButton = page.locator(
+      "button[data-testid='add-account-button']"
+    );
+  }
+
+  async profileSummaryIsLoaded() {
+    await expect(
+      this.profileLoader,
+      "Profile loader is detached"
+    ).not.toBeAttached();
+    await expect(
+      this.editProfileButton,
+      "Edit profile button is enabled"
+    ).toBeEnabled();
+    return this;
+  }
+
+  async accountsTableIsLoaded() {
+    await expect(
+      this.accountsLoader,
+      "Accounts loader is detached"
+    ).not.toBeAttached();
+    await expect(this.accountsTable, "Accounts table is visible").toBeVisible();
+    return this;
   }
 
   async clickEditProfile() {
-    await expect(
-      this.editProfileButton,
-      "Edit profile button enabled"
-    ).toBeEnabled();
+    await this.profileSummaryIsLoaded();
     await this.editProfileButton.click();
     return this;
   }
@@ -160,9 +207,9 @@ export class DashboardPage {
     return this;
   }
 
-  async accountsTableIsLoaded() {
-    await expect(this.accountsLoader).not.toBeAttached();
-    await expect(this.accountsTable, "Accounts table is visible").toBeVisible();
+  async clickAddAccount() {
+    await this.accountsTableIsLoaded();
+    await this.addAccountButton.click();
     return this;
   }
 }
