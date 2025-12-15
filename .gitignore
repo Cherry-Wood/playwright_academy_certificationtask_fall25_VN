@@ -149,4 +149,4 @@ playwright.yml
 
 .env
 *.env
-TODO.txt
+bug_report.txt
